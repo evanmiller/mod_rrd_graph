@@ -1,0 +1,45 @@
+mod_rrd_graph
+=============
+
+RRDtool[1] stores and graphs time-series data. ngx_rrd_graph provides an HTTP
+interface to RRDtool's graphing facilities. By linking RRDtool code directly
+into Nginx, it is faster than scripts and CGIs with similar purposes.
+
+To install, compile nginx with this option:
+
+    --add-module=/path/to/this/directory
+
+ngx_rrd_graph requires RRDtool 1.3 or later. 
+
+After compiling, installing, and restarting Nginx, ngx_rrd_graph can be enabled
+at a particular location with the "rrd_graph" directive, like so:
+
+    location /rrdtool {
+        rrd_graph;
+    }
+
+RRDtool graphing commands can then be appended to that location in request
+URLs. The syntax is just the same as the arguments to the "rrdtool graph"
+command, omitting the filename. (Refer to rrdgraph(1).) These commands should
+be URL-encoded, so that this command-line invocation:
+
+    rrdtool graph --start now-300s \
+                  --end now \
+                  DEF:ds0=test.rrd:reading:AVERAGE \
+                  LINE1:ds0#00FF00
+
+becomes:
+
+    http://mysite.com/rrdtool--start%20now-300s%20--end%20now%20DEF%3Ads0%3Dtest.rrd%3Areading%3AAVERAGE%20LINE1%3Ads0%2300FF00
+
+The module supports all the features of your copy of RRDtool. It can output
+PNG, PDF, SVG, and EPS graphics (see the --imgformat option of rrdgraph(1)).
+
+If you'd prefer not to provide absolute paths to files referenced in DEF commands,
+you may supply a root directory with the "rrd_graph_root" directive. Files mentioned
+in DEF commands will be automatically prefixed with the value of rrd_graph_root.
+As of this writing there are no guards against relative paths (e.g. "..").
+
+Questions/comments to emmiller@gmail.com.
+
+[1] http://oss.oetiker.ch/rrdtool/
