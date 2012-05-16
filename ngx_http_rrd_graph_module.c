@@ -189,6 +189,8 @@ ngx_http_rrd_graph_parse_uri(ngx_http_request_t *r, int *argc_ptr,
             *p = '\0';
             argv[argc++] = p+1;
         } else {
+            if (*p == '~')
+                *p = ' ';
             argv_len[argc-1]++;
         }
         p++;
