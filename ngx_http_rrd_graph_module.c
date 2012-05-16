@@ -151,7 +151,7 @@ static ngx_int_t
 ngx_http_rrd_graph_parse_uri(ngx_http_request_t *r, int *argc_ptr, 
     char ***argv_ptr, size_t **argv_len_ptr)
 {
-    int i,   argc = 3;
+    int i,   argc = 3, in_quote = 0;
     char   **argv;
     size_t  *argv_len;
     char *tmp, *p;
@@ -174,9 +174,16 @@ ngx_http_rrd_graph_parse_uri(ngx_http_request_t *r, int *argc_ptr,
     uri_copy[r->uri.len] = '\0'; /* RRDtool needs null-terminated strings */
     p = (char *)uri_copy + clcf->name.len;
 
-    while(*p++)
-        if (*p == ' ')
+    while(*p++) {
+        if (*p == '"') {
+            in_quote = !in_quote;
+        } else if (*p == ' ' && !in_quote) {
             argc++;
+        }
+    }
+
+    if (in_quote)
+        return NGX_ERROR;
 
     argv     = ngx_palloc(r->pool, argc*sizeof(char *));
     argv_len = ngx_pcalloc(r->pool, argc*sizeof(size_t));
@@ -185,10 +192,13 @@ ngx_http_rrd_graph_parse_uri(ngx_http_request_t *r, int *argc_ptr,
     argv[2] = p = (char *)uri_copy + clcf->name.len;
     argc = 3;
     while (*p) {
-        if (*p == ' ') {
+        if (*p == ' ' && !in_quote) {
             *p = '\0';
             argv[argc++] = p+1;
         } else {
+            if (*p == '"')
+                in_quote = !in_quote;
+
             argv_len[argc-1]++;
         }
         p++;
