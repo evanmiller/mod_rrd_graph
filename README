@@ -32,6 +32,16 @@ becomes:
 
     http://mysite.com/rrdtool--start%20now-300s%20--end%20now%20DEF%3Ads0%3Dtest.rrd%3Areading%3AAVERAGE%20LINE1%3Ads0%2300FF00
 
+Spaces can be inlcuded in argument values by using the tilde character.
+For example, the title of the following example will be rendered as
+"Test Graph":
+
+    rrdtool graph --start now-300s \
+                  --end now \
+                  --tile Test~Graph \
+                  DEF:ds0=test.rrd:reading:AVERAGE \
+                  LINE1:ds0#00FF00
+
 The module supports all the features of your copy of RRDtool. It can output
 PNG, PDF, SVG, and EPS graphics (see the --imgformat option of rrdgraph(1)).
 
