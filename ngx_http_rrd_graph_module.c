@@ -204,6 +204,14 @@ ngx_http_rrd_graph_parse_uri(ngx_http_request_t *r, int *argc_ptr,
         p++;
     }
 
+    for (i = 0; i < argc; i++) {
+        if (*argv[i] == '\"') {
+            argv[i] = argv[i] + 1;
+            argv_len[i] = argv_len[i] - 2;
+            argv[i][argv_len[i]] = '\0';
+        }
+    }
+
     conf = ngx_http_get_module_loc_conf(r, ngx_http_rrd_graph_module);
     /* splice in the RRD directory root */
     /* TODO guard against relative paths */
